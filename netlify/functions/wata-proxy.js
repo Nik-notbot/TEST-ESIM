@@ -170,6 +170,12 @@ exports.handler = async (event) => {
     let data;
     try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
 
+    // Снимем заголовки ответа для диагностики (например, WWW-Authenticate)
+    const responseHeaders = {};
+    if (resp && resp.headers && typeof resp.headers.forEach === 'function') {
+      resp.headers.forEach((value, key) => { responseHeaders[key] = value; });
+    }
+
     if (!resp || !resp.ok) {
       // Соберём безопасный debug без утечки ключа
       function redact(h) {
@@ -198,7 +204,9 @@ exports.handler = async (event) => {
               WATA_AUTH_HEADER: process.env.WATA_AUTH_HEADER,
               WATA_AUTH_SCHEME: process.env.WATA_AUTH_SCHEME
             },
-            headersTried: candidateHeaders.map(redact)
+            headersTried: candidateHeaders.map(redact),
+            responseHeaders,
+            responseText: text
           }
         })
       };
