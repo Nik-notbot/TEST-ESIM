@@ -171,10 +171,36 @@ exports.handler = async (event) => {
     try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
 
     if (!resp || !resp.ok) {
+      // Соберём безопасный debug без утечки ключа
+      function redact(h) {
+        if (!h) return h;
+        const copy = { ...h };
+        if (copy.Authorization) copy.Authorization = 'REDACTED';
+        if (copy['X-Api-Key']) copy['X-Api-Key'] = 'REDACTED';
+        return copy;
+      }
       return {
         statusCode: resp ? resp.status : 500,
         headers,
-        body: JSON.stringify({ error: 'Failed to create payment', status: resp ? resp.status : 500, data, tried: candidateUrls, lastError })
+        body: JSON.stringify({
+          error: 'Failed to create payment',
+          status: resp ? resp.status : 500,
+          data,
+          tried: candidateUrls,
+          lastError,
+          debug: {
+            envCheck: {
+              WATA_API_KEY: !!process.env.WATA_API_KEY,
+              WATA_CREATE_PAYMENT_URL: !!process.env.WATA_CREATE_PAYMENT_URL,
+              WATA_PAYMENT_URL: !!process.env.WATA_PAYMENT_URL,
+              WATA_API_URL: !!process.env.WATA_API_URL,
+              WATA_URL: !!process.env.WATA_URL,
+              WATA_AUTH_HEADER: process.env.WATA_AUTH_HEADER,
+              WATA_AUTH_SCHEME: process.env.WATA_AUTH_SCHEME
+            },
+            headersTried: candidateHeaders.map(redact)
+          }
+        })
       };
     }
 
