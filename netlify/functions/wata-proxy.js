@@ -190,7 +190,17 @@ exports.handler = async (event) => {
         success: true,
         paymentId,
         paymentUrl,
-        raw: data
+        raw: data,
+        debug: {
+          usedUrl: apiUrl,
+          usedHeaders: candidateHeaders[0],
+          envCheck: {
+            WATA_API_KEY: !!process.env.WATA_API_KEY,
+            WATA_CREATE_PAYMENT_URL: !!process.env.WATA_CREATE_PAYMENT_URL,
+            WATA_AUTH_HEADER: process.env.WATA_AUTH_HEADER,
+            WATA_AUTH_SCHEME: process.env.WATA_AUTH_SCHEME
+          }
+        }
       })
     };
   } catch (error) {
