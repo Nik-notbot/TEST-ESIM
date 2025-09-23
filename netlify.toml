@@ -1,0 +1,10 @@
+[[redirects]]
+  from = "/api/supabase/*"
+  to = "https://nwcleyhnbzxetcqtlim.supabase.co/:splat"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

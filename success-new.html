@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Успешная оплата - eSIM</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=104177270', 'ym');
+
+        ym(104177270, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/104177270" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .success-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.2),
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            transform: translateY(-5px);
+        }
+        
+        .success-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .success-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .success-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .success-content {
+            padding: 40px;
+        }
+        
+        .qr-container {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 30px 0;
+            display: none;
+            border: 1px solid #e8ecff;
+            position: relative;
+            text-align: center;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.1),
+                0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        
+        .qr-code-wrapper {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            display: inline-block;
+            margin: 20px auto;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e8ecff;
+        }
+        
+        .qr-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .qr-code-wrapper img {
+            max-width: 280px;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .qr-code-wrapper img:hover {
+            transform: scale(1.05);
+        }
+        
+        .loading {
+            font-size: 18px;
+            color: #666;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f7ff 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+            text-align: left;
+            border: 1px solid #bbdefb;
+            position: relative;
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+        
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 12px 0;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .order-details {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .esim-info {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+            border: 1px solid #e8ecff;
+            position: relative;
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+        
+        
+        .esim-info h3 {
+            margin: 0 0 20px 0;
+            color: #2d3748;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .esim-details {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .esim-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e8ecff;
+        }
+        
+        .esim-item:last-child {
+            border-bottom: none;
+        }
+        
+        .esim-item .label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+        
+        .esim-item .value {
+            font-weight: 500;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+        
+        .instruction-section {
+            margin: 25px 0;
+            padding: 25px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            border: 1px solid #e8ecff;
+            position: relative;
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.06),
+                0 3px 8px rgba(0, 0, 0, 0.03);
+        }
+        
+        
+        .instruction-section.important {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f7ff 100%);
+            border: 1px solid #bbdefb;
+        }
+        
+        .instruction-section.warning {
+            background: linear-gradient(135deg, #fff3e0 0%, #fef7e0 100%);
+            border: 1px solid #ffcc02;
+        }
+        
+        .instruction-section.critical {
+            background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+            border: 2px solid #f44336;
+        }
+        
+        .instruction-section h4 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .instruction-section ul, .instruction-section ol {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        
+        .instruction-section li {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #4a5568;
+        }
+        
+        .instruction-section p {
+            margin: 12px 0;
+            line-height: 1.6;
+            color: #4a5568;
+        }
+        
+        .instruction-section strong {
+            color: #1976d2;
+        }
+        
+        .instruction-section em {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .recharge-link {
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        
+        .recharge-link:hover {
+            text-decoration: underline;
+            color: #1976d2;
+        }
+        
+        .instruction-section h4 .recharge-link {
+            color: #2196f3;
+            font-weight: 600;
+        }
+        
+        .instruction-section h4 .recharge-link:hover {
+            color: #1976d2;
+            text-decoration: underline;
+        }
+        
+        .instruction-section.critical h4 {
+            color: #d32f2f;
+            font-weight: 700;
+        }
+        
+        .instruction-section.critical strong {
+            color: #d32f2f;
+        }
+        
+        .telegram-link {
+            color: #0088cc;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .telegram-link:hover {
+            color: #006699;
+            text-decoration: underline;
+        }
+        
+        .buy-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .buy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .success-container {
+                margin: 20px;
+                border-radius: 20px;
+            }
+            
+            .success-header {
+                padding: 30px 20px;
+            }
+            
+            .success-header h1 {
+                font-size: 2rem;
+            }
+            
+            .success-content {
+                padding: 30px 20px;
+            }
+            
+            .qr-container {
+                padding: 25px;
+            }
+            
+            .instructions {
+                padding: 25px;
+            }
+            
+            .instruction-section {
+                padding: 20px;
+            }
+            
+            .esim-info {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-header">
+            <div class="success-icon">✅</div>
+            <h1 class="success-title">Спасибо за покупку!</h1>
+            <p class="success-subtitle">Ваш eSIM готов к активации</p>
+        </div>
+        
+        <div class="success-content">
+            <p class="loading" id="loading-message">Получаем ваш QR-код...</p>
+        
+        
+        
+        <div id="order-details" class="order-details" style="display: none;"></div>
+        
+        <div id="qr-container" class="qr-container">
+            <h2>Ваш QR-код для активации eSIM</h2>
+            <div class="qr-code-wrapper">
+                <img id="qr-code-img" src="" alt="QR код для eSIM">
+            </div>
+            <p>
+                <a id="download-link" href="" download="esim-qr-code.png" style="color: #2196F3;">
+                    Скачать QR-код
+                </a>
+            </p>
+            
+            <!-- Дополнительная информация о eSIM -->
+            <div id="esim-info" class="esim-info" style="display: none;">
+                <h3>Информация о вашей eSIM</h3>
+                <div class="esim-details">
+                    <div class="esim-item">
+                        <span class="label">Страна:</span>
+                        <span id="country-info" class="value">-</span>
+                    </div>
+                    <div class="esim-item">
+                        <span class="label">Номер eSIM:</span>
+                        <span id="esim-number" class="value">-</span>
+                    </div>
+                    <div class="esim-item">
+                        <span class="label">PIN код:</span>
+                        <span id="pin-code" class="value">-</span>
+                    </div>
+                    <div class="esim-item">
+                        <span class="label">PUK код:</span>
+                        <span id="puk-code" class="value">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="error-message" class="error-message">
+            <h3>Временная проблема</h3>
+            <p>Не удалось автоматически получить QR-код. Пожалуйста, сохраните номер вашего заказа:</p>
+            <p><strong id="order-id-fallback"></strong></p>
+            <p>Мы отправим QR-код на вашу электронную почту в течение нескольких минут.</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>Инструкция по установке eSIM через QR-код</h3>
+            
+            <div class="instruction-section">
+                <h4>Перед началом убедитесь, что:</h4>
+                <ul>
+                    <li>Ваш телефон поддерживает eSIM.</li>
+                    <li>У вас есть стабильное подключение к Wi-Fi или мобильной сети.</li>
+                    <li>Вы получили QR-код от нас (по ссылке или изображением).</li>
+                </ul>
+            </div>
+
+            <div class="instruction-section critical">
+                <h4>ВАЖНО! Правила использования QR-кода:</h4>
+                <ul>
+                    <li><strong>QR-код можно использовать только 1 раз!</strong></li>
+                    <li><strong>Удалять профиль после подключения нельзя!</strong></li>
+                </ul>
+                <p>Если вы случайно удалите профиль eSIM или попытаетесь использовать QR-код повторно, восстановить подключение будет невозможно. Будьте внимательны!</p>
+            </div>
+
+            <div class="instruction-section">
+                <h4>Для iPhone (iOS 13 и выше):</h4>
+                <ol>
+                    <li>Зайдите в <strong>Настройки → Сотовая связь → Добавить сотовый тариф</strong>.</li>
+                    <li>Наведите камеру на QR-код, который мы вам отправили.</li>
+                    <li>Дождитесь загрузки профиля и нажмите <strong>Добавить тариф</strong>.</li>
+                    <li>При необходимости — выберите, как использовать этот тариф (основной / дополнительный).</li>
+                </ol>
+            </div>
+
+            <div class="instruction-section">
+                <h4>Для Android (Samsung, Pixel, Xiaomi и др.):</h4>
+                <ol>
+                    <li>Зайдите в <strong>Настройки → Подключения → Мобильные сети → Добавить eSIM</strong><br>
+                        <em>(или: Сеть → SIM-карты → Добавить мобильный тариф)</em></li>
+                    <li>Выберите <strong>Сканировать QR-код</strong>.</li>
+                    <li>Наведите камеру на QR-код.</li>
+                    <li>Подтвердите установку профиля и дождитесь подключения.</li>
+                </ol>
+                <p><strong>Некоторые модели могут перезагрузиться — это нормально.</strong></p>
+            </div>
+
+            <div class="instruction-section important">
+                <h4>Важные настройки:</h4>
+                <p>Обязательно включите <strong>роуминг данных</strong>, включите <strong>вызовы по WiFi</strong>, даже если вы находитесь в своей стране.<br>
+                Это не приведёт к дополнительным расходам, но необходимо для корректной работы сети в большинстве eSIM-тарифов.</p>
+            </div>
+
+            <div class="instruction-section warning">
+                <h4>Обратите внимание:</h4>
+                <p>Если ваша eSIM не подключается автоматически и вы не получаете СМС с кодом, попробуйте вручную переключиться между разными операторами (например, МТС, Билайн, Теле2). Дайте каждому оператору примерно 10 минут, чтобы проверить, появится ли сеть и придёт ли СМС.</p>
+            </div>
+
+            <div class="instruction-section">
+                <h4><a href="https://www.recharge.com/es/es/simyo" target="_blank" class="recharge-link">Сайт для пополнения eSIM</a></h4>
+            </div>
+
+            <div class="instruction-section important">
+                <h4>Поддержка и помощь</h4>
+                <p>Если у вас возникли вопросы или проблемы с активацией eSIM, обращайтесь к нам:</p>
+                <ul>
+                    <li><strong>Техподдержка:</strong> <a href="https://t.me/heykyc_official" target="_blank" class="telegram-link">@heykyc_official</a></li>
+                    <li><strong>Наш канал:</strong> <a href="https://t.me/HEYKYCSTORE" target="_blank" class="telegram-link">@HEYKYCSTORE</a></li>
+                </ul>
+                <p><em>В нашем канале есть другие интересные товары кроме eSIM, например такие как финтех банки и не только!</em></p>
+            </div>
+        </div>
+        
+        <a href="index.html" class="buy-button">Вернуться на главную</a>
+    </div>
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Конфигурация Supabase будет загружена с сервера
+        let supabase = null;
+        let supabaseUrl = null;
+
+        // Функция для инициализации Supabase
+        async function initSupabase() {
+            try {
+                console.log('Loading Supabase configuration...');
+                const response = await fetch('/.netlify/functions/get-config');
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Failed to load configuration:', errorData);
+                    throw new Error(`Configuration error: ${errorData.message || 'Unknown error'}`);
+                }
+                
+                const config = await response.json();
+                console.log('Configuration loaded:', { 
+                    hasUrl: !!config.supabaseUrl, 
+                    hasKey: !!config.supabaseAnonKey 
+                });
+                
+                if (!config.supabaseUrl || !config.supabaseAnonKey) {
+                    throw new Error('Missing Supabase configuration. Please check environment variables in Netlify.');
+                }
+                
+                supabaseUrl = config.supabaseUrl;
+                
+                // Инициализация Supabase клиента
+                const { createClient } = window.supabase;
+                supabase = createClient(supabaseUrl, config.supabaseAnonKey);
+                
+                console.log('Supabase initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                throw error;
+            }
+        }
+        
+        // Функция для получения QR-кода
+        async function getQRCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+            
+            if (!orderId) {
+                showError('Номер заказа не найден');
+                return;
+            }
+            
+            try {
+                console.log('Получаем информацию о заказе:', orderId);
+                
+                // Получаем информацию о заказе через серверную функцию
+                const orderResponse = await fetch(`/.netlify/functions/order-handler/get-order?orderId=${orderId}`);
+                const orderResult = await orderResponse.json();
+                
+                if (!orderResponse.ok) {
+                    console.error('Ошибка получения заказа:', orderResult.error);
+                    showError('Заказ не найден');
+                    return;
+                }
+                
+                const order = orderResult.order;
+                console.log('Заказ найден:', order);
+                
+                // Показываем детали заказа
+                const orderDetails = document.getElementById('order-details');
+                orderDetails.innerHTML = `
+                    <strong>Заказ №:</strong> ${order.id}<br>
+                    <strong>Тариф:</strong> ${order.esim_plans.name} - ${order.esim_plans.data_gb} ГБ<br>
+                    <strong>Email:</strong> ${order.customer_email}
+                `;
+                orderDetails.style.display = 'block';
+                
+                // Проверяем статус оплаты
+                if (order.status === 'processing') {
+                    console.log('Ожидаем подтверждение оплаты...');
+                    
+                    // Ждем 2 секунды и проверяем снова (максимум 5 попыток = 10 секунд)
+                    if (window.checkAttempts === undefined) {
+                        window.checkAttempts = 0;
+                    }
+                    window.checkAttempts++;
+                    
+                    if (window.checkAttempts < 5) {
+                        setTimeout(() => getQRCode(), 2000);
+                    } else {
+                        console.log('Таймаут ожидания подтверждения. Показываем сообщение об ожидании.');
+                        showError('Оплата обрабатывается, QR-код будет выслан на email после подтверждения.', order.id);
+                    }
+                    return;
+                } else if (order.status !== 'paid' && order.status !== 'completed') {
+                    console.log('Статус заказа:', order.status);
+                    // Если статус не processing, но и не paid/completed, все равно показываем QR-код
+                    console.log('Показываем QR-код несмотря на статус:', order.status);
+                    await getQRCodeFromServer(order.id);
+                    return;
+                }
+                
+                // Получаем QR-код через серверную функцию
+                console.log('Получаем QR-код для заказа:', orderId);
+                await getQRCodeFromServer(orderId);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Произошла ошибка при получении QR-кода');
+            }
+        }
+        
+        // Функция для получения QR-кода с сервера
+        async function getQRCodeFromServer(orderId) {
+            try {
+                console.log('Получаем QR-код с сервера для заказа:', orderId);
+                
+                const response = await fetch(`/.netlify/functions/order-handler/get-qr-code?orderId=${orderId}`);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Ошибка получения QR-кода:', result.error);
+                    
+                    // Специальная обработка ошибки безопасности
+                    if (response.status === 403) {
+                        showError('Оплата не подтверждена. QR-код можно получить только после успешной оплаты.');
+                        return;
+                    }
+                    
+                    showError(result.error || 'Не удалось получить QR-код');
+                    return;
+                }
+                
+                const { qrCode, order } = result;
+                console.log('QR-код получен:', qrCode);
+                
+                // Показываем QR-код с дополнительной информацией
+                showQRCode(qrCode.qr_url, qrCode);
+                
+            } catch (error) {
+                console.error('Ошибка получения QR-кода с сервера:', error);
+                showError('Произошла ошибка при получении QR-кода');
+            }
+        }
+
+        
+        
+        
+        // Функция для преобразования URL ImgBB в прямую ссылку на изображение
+        function convertImgBBUrl(url) {
+            // Если это уже прямая ссылка на изображение, возвращаем как есть
+            if (url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif')) {
+                return url;
+            }
+            
+            // Если это ссылка на ImgBB страницу, преобразуем в прямую ссылку
+            if (url.includes('ibb.co/')) {
+                // Извлекаем ID изображения из URL
+                const match = url.match(/ibb\.co\/([a-zA-Z0-9]+)/);
+                if (match && match[1]) {
+                    const imageId = match[1];
+                    // Преобразуем в прямую ссылку на изображение
+                    return `https://i.ibb.co/${imageId}/image.png`;
+                }
+            }
+            
+            // Если это ссылка на i.ibb.co, но без расширения, добавляем .png
+            if (url.includes('i.ibb.co/') && !url.includes('.')) {
+                return url + '.png';
+            }
+            
+            // Возвращаем оригинальный URL, если не удалось преобразовать
+            return url;
+        }
+        
+        function showQRCode(url, qrData = null) {
+            console.log('Показываем QR-код:', url);
+            console.log('Дополнительные данные:', qrData);
+            
+            // Преобразуем URL ImgBB в прямую ссылку на изображение
+            const directImageUrl = convertImgBBUrl(url);
+            console.log('Преобразованный URL:', directImageUrl);
+            
+            // Скрываем сообщение о загрузке
+            document.getElementById('loading-message').style.display = 'none';
+            
+            
+            
+            // Показываем контейнер QR-кода
+            const qrContainer = document.getElementById('qr-container');
+            qrContainer.style.display = 'block';
+            
+            // Устанавливаем ссылку для скачивания
+            document.getElementById('download-link').href = directImageUrl;
+            
+            // Устанавливаем источник изображения
+            const qrImg = document.getElementById('qr-code-img');
+            qrImg.src = directImageUrl;
+            
+            // Отображаем дополнительную информацию о eSIM
+            if (qrData) {
+                displayESIMInfo(qrData);
+            }
+            
+            // Добавляем обработчики для отладки
+            qrImg.onload = function() {
+                console.log('QR-код успешно загружен');
+            };
+            
+            qrImg.onerror = function() {
+                console.error('Ошибка загрузки QR-кода:', directImageUrl);
+                console.log('Пробуем альтернативные варианты...');
+                
+                // Пробуем другие варианты URL
+                const alternativeUrls = [
+                    url.replace('ibb.co/', 'i.ibb.co/') + '.png',
+                    url.replace('ibb.co/', 'i.ibb.co/') + '.jpg',
+                    url.replace('ibb.co/', 'i.ibb.co/') + '.jpeg',
+                    url + '.png',
+                    url + '.jpg'
+                ];
+                
+                let currentIndex = 0;
+                const tryNextUrl = () => {
+                    if (currentIndex < alternativeUrls.length) {
+                        const altUrl = alternativeUrls[currentIndex];
+                        console.log('Пробуем альтернативный URL:', altUrl);
+                        qrImg.src = altUrl;
+                        currentIndex++;
+                    } else {
+                        // Все варианты исчерпаны, показываем альтернативный текст
+                        console.log('Все варианты URL исчерпаны');
+                        qrImg.style.display = 'none';
+                        const qrWrapper = qrImg.parentElement;
+                        qrWrapper.innerHTML = `
+                            <div style="padding: 20px; border: 2px dashed #ccc; border-radius: 8px;">
+                                <p style="margin: 0; color: #666;">QR-код готов к скачиванию</p>
+                                <p style="margin: 10px 0 0 0; font-size: 14px; color: #999;">Изображение не отображается, но ссылка для скачивания работает</p>
+                                <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">Оригинальный URL: ${url}</p>
+                            </div>
+                        `;
+                    }
+                };
+                
+                qrImg.onerror = tryNextUrl;
+                qrImg.onload = function() {
+                    console.log('Альтернативный URL сработал:', qrImg.src);
+                };
+                
+                tryNextUrl();
+            };
+            
+            console.log('QR-код должен быть виден');
+        }
+        
+        // Функция для отображения дополнительной информации о eSIM
+        function displayESIMInfo(qrData) {
+            console.log('Отображаем информацию о eSIM:', qrData);
+            
+            const esimInfoDiv = document.getElementById('esim-info');
+            if (!esimInfoDiv) return;
+            
+            // Заполняем информацию
+            const countryInfo = document.getElementById('country-info');
+            const esimNumber = document.getElementById('esim-number');
+            const pinCode = document.getElementById('pin-code');
+            const pukCode = document.getElementById('puk-code');
+            
+            if (countryInfo && qrData.country_name && qrData.country_code) {
+                countryInfo.textContent = `${qrData.country_name} (${qrData.country_code})`;
+            }
+            
+            if (esimNumber && qrData.esim_number) {
+                esimNumber.textContent = qrData.esim_number;
+            }
+            
+            if (pinCode && qrData.pin_code) {
+                pinCode.textContent = qrData.pin_code;
+            }
+            
+            if (pukCode && qrData.puk_code) {
+                pukCode.textContent = qrData.puk_code;
+            }
+            
+            // Показываем блок с информацией
+            esimInfoDiv.style.display = 'block';
+        }
+        
+        function showError(message, orderId = null) {
+            document.getElementById('loading-message').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+            if (orderId) {
+                document.getElementById('order-id-fallback').textContent = orderId;
+            }
+        }
+        
+        // Запускаем при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Отправляем цель покупки в Яндекс.Метрику
+                if (typeof ym !== 'undefined') {
+                    ym(104177270, 'reachGoal', 'purchase');
+                }
+                
+                // Инициализируем Supabase
+                await initSupabase();
+                
+                // Получаем QR-код
+                getQRCode();
+                
+                
+                
+            } catch (error) {
+                console.error('Initialization failed:', error);
+                
+                // Показываем пользователю понятное сообщение
+                document.getElementById('loading-message').innerHTML = `
+                    <div style="color: #ff4444; text-align: center; padding: 20px;">
+                        <strong>Ошибка конфигурации</strong><br>
+                        Не удалось загрузить настройки приложения.<br>
+                        <small>Обратитесь к администратору для решения проблемы.</small>
+                    </div>
+                `;
+                
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

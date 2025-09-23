@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление QR-кодами - eSIM Store</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        .qr-form {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .add-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .add-button:hover {
+            background: #45a049;
+        }
+        .qr-list {
+            margin-top: 30px;
+        }
+        .qr-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        .qr-item.used {
+            opacity: 0.6;
+            background: #ffebee;
+        }
+        .qr-preview {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .delete-button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .delete-button:hover {
+            background: #d32f2f;
+        }
+        .status {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.available {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.used {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .export-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .export-button:hover {
+            background: #1976D2;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Управление QR-кодами</h1>
+        
+        <div class="instructions">
+            <h3>Как добавить QR-коды:</h3>
+            <ol>
+                <li>Загрузите изображения QR-кодов на <a href="https://imgbb.com" target="_blank">imgbb.com</a></li>
+                <li>Скопируйте прямую ссылку на изображение (заканчивается на .png или .jpg)</li>
+                <li>Выберите тариф и вставьте ссылку в форму ниже</li>
+            </ol>
+        </div>
+        
+        <div class="qr-form">
+            <h2>Добавить новый QR-код</h2>
+            <div class="form-group">
+                <label for="planSelect">Тариф:</label>
+                <select id="planSelect">
+                    <option value="1">Стандарт (8 ГБ)</option>
+                    <option value="2">Премиум (25 ГБ)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="qrUrl">URL изображения QR-кода:</label>
+                <input type="url" id="qrUrl" placeholder="https://i.ibb.co/xxxxxx/qr-code.png">
+            </div>
+            <button class="add-button" onclick="addQRCode()">Добавить QR-код</button>
+        </div>
+        
+        <div class="qr-list">
+            <h2>Список QR-кодов</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="export-button" onclick="exportQRCodes()">Экспорт в файл</button>
+                <button class="export-button" onclick="importQRCodes()">Импорт из файла</button>
+                <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport(event)">
+            </div>
+            <div id="qrList"></div>
+        </div>
+    </div>
+    
+    <script src="qr-codes-data.js"></script>
+    <script>
+        function displayQRCodes() {
+            const listDiv = document.getElementById('qrList');
+            let html = '';
+            
+            // Показываем QR-коды для каждого тарифа
+            for (const [planId, codes] of Object.entries(QR_CODES)) {
+                const planName = planId === "1" ? "Стандарт (8 ГБ)" : "Премиум (25 ГБ)";
+                html += `<h3>${planName}</h3>`;
+                
+                if (codes.length === 0) {
+                    html += '<p style="color: #999;">Нет QR-кодов для этого тарифа</p>';
+                } else {
+                    codes.forEach((code, index) => {
+                        html += `
+                            <div class="qr-item ${code.used ? 'used' : ''}">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <img src="${code.url}" alt="QR" class="qr-preview" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect width=%2260%22 height=%2260%22 fill=%22%23f0f0f0%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2212%22%3EQR%3C/text%3E%3C/svg%3E'">
+                                    <div>
+                                        <strong>ID:</strong> ${code.id}<br>
+                                        <small style="color: #666; word-break: break-all;">${code.url}</small>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="status ${code.used ? 'used' : 'available'}">
+                                        ${code.used ? 'Использован' : 'Доступен'}
+                                    </span>
+                                    <button class="delete-button" onclick="deleteQRCode('${planId}', ${index})">
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+            
+            listDiv.innerHTML = html;
+        }
+        
+        function addQRCode() {
+            const planId = document.getElementById('planSelect').value;
+            const url = document.getElementById('qrUrl').value.trim();
+            
+            if (!url) {
+                alert('Введите URL изображения QR-кода');
+                return;
+            }
+            
+            // Проверяем, что URL похож на ссылку на изображение
+            if (!url.match(/\.(jpg|jpeg|png|gif|webp)$/i) && !url.includes('ibb.co')) {
+                if (!confirm('URL не похож на ссылку на изображение. Продолжить?')) {
+                    return;
+                }
+            }
+            
+            // Генерируем ID
+            const prefix = planId === "1" ? "qr_std_" : "qr_prm_";
+            const id = prefix + Date.now();
+            
+            // Добавляем QR-код
+            if (!QR_CODES[planId]) {
+                QR_CODES[planId] = [];
+            }
+            
+            QR_CODES[planId].push({
+                id: id,
+                url: url,
+                used: false
+            });
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('qr_codes_state', JSON.stringify(QR_CODES));
+            
+            // Очищаем форму
+            document.getElementById('qrUrl').value = '';
+            
+            // Обновляем список
+            displayQRCodes();
+            
+            alert('QR-код добавлен успешно!');
+        }
+        
+        function deleteQRCode(planId, index) {
+            if (confirm('Удалить этот QR-код?')) {
+                QR_CODES[planId].splice(index, 1);
+                localStorage.setItem('qr_codes_state', JSON.stringify(QR_CODES));
+                displayQRCodes();
+            }
+        }
+        
+        function exportQRCodes() {
+            const dataStr = JSON.stringify(QR_CODES, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'qr-codes-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+        }
+        
+        function importQRCodes() {
+            document.getElementById('importFile').click();
+        }
+        
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (confirm('Это заменит все текущие QR-коды. Продолжить?')) {
+                            Object.assign(QR_CODES, imported);
+                            localStorage.setItem('qr_codes_state', JSON.stringify(QR_CODES));
+                            displayQRCodes();
+                            alert('QR-коды успешно импортированы!');
+                        }
+                    } catch (error) {
+                        alert('Ошибка при чтении файла: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        // Отображаем QR-коды при загрузке
+        displayQRCodes();
+    </script>
+</body>
+</html>
