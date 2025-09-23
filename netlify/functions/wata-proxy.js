@@ -98,7 +98,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON body' }) };
     }
 
-    const { amount, currency = 'RUB', description, orderId, customerEmail, successUrl, failUrl, type, expirationDateTime } = payload;
+    const { amount, currency = 'RUB', description, orderId, customerEmail, successUrl, failUrl, successRedirectUrl: successRedirectUrlIn, failRedirectUrl: failRedirectUrlIn, type, expirationDateTime } = payload;
     if (!amount || !orderId || !description) {
       return {
         statusCode: 400,
@@ -114,8 +114,8 @@ exports.handler = async (event) => {
       currency,
       description,
       orderId,
-      successRedirectUrl: successUrl,
-      failRedirectUrl: failUrl,
+      successRedirectUrl: successRedirectUrlIn || successUrl,
+      failRedirectUrl: failRedirectUrlIn || failUrl,
       expirationDateTime
     };
 
@@ -135,9 +135,16 @@ exports.handler = async (event) => {
     candidateHeaders.push(buildHeaders(configuredAuthHeader, configuredAuthScheme));
     // 2) Authorization: Bearer <key>
     candidateHeaders.push(buildHeaders('Authorization', 'Bearer'));
-    // 3) X-Api-Key: <key>
+    // 3) Authorization: Token <key>
+    candidateHeaders.push(buildHeaders('Authorization', 'Token'));
+    // 4) Authorization: <key> (без схемы)
+    candidateHeaders.push(buildHeaders('Authorization', ''));
+    // 5) X-Api-Key: <key>
     const hX = { 'Content-Type': 'application/json', 'X-Api-Key': apiKey };
     candidateHeaders.push(hX);
+    // 6) X-Token: <key>
+    const hXT = { 'Content-Type': 'application/json', 'X-Token': apiKey };
+    candidateHeaders.push(hXT);
 
     // Try with candidates until one succeeds (not 401/403)
     let resp;
