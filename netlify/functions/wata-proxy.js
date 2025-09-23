@@ -85,15 +85,9 @@ exports.handler = async (event) => {
       };
     }
 
-    // Если URL не задан, пробуем стандартные эндпоинты из документации
+    // Если URL не задан, используем официальный эндпоинт Wata H2H links
     const defaultCandidates = [
-      'https://api.wata.pro/api/h2h/links',
-      'https://wata.pro/api/payments',
-      'https://wata.pro/api/payment',
-      'https://wata.pro/api/payment/create',
-      'https://wata.pro/api/payments/create',
-      'https://wata.pro/api/transactions',
-      'https://wata.pro/api/transactions/create'
+      'https://api.wata.pro/api/h2h/links'
     ];
     const candidateUrls = apiUrl ? [apiUrl] : defaultCandidates;
 
